@@ -1,0 +1,11 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodeapp
+spec:
+  tls:
+    - secretName: nodeapp-tls
+      hosts:
+        - nodeapp.example.com
+  rules:
+    - host: nodeapp.example.com
