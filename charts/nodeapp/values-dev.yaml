@@ -1,0 +1,15 @@
+# values-dev.yaml
+replicaCount: 2
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: nodeapp.local
+      paths:
+        - path: /?(.*)
+          pathType: Prefix
+  tls: []
+
+env:
+  MESSAGE: "Hello from DEV 👋"

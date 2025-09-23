@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+nameSuffix: -dev
+namespace: app-demo
+
+resources:
+  - ../../base
+
+patches:
+  - path: patch-replicas.yaml
+  - path: patch-ingress.yaml
+
+images:
+  - name: ghcr.io/ajdevopssolutions/nodejs-docker-k8s-starter
+    newName: ghcr.io/ajdevopssolutions/nodejs-docker-k8s-starter
+    newTag: dev
+
+configMapGenerator:
+  - name: nodeapp-config
+    behavior: merge
+    literals:
+      - MESSAGE=Hello from DEV 👋
