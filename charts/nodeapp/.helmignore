@@ -1,9 +1,0 @@
-# Common ignores
-.DS_Store
-.git/
-.github/
-*.swp
-*.tmp
-*.log
-node_modules/
-charts/*-*.tgz
