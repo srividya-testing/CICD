@@ -2,7 +2,7 @@ name: CI Build & Helm Deploy
 
 on:
   push:
-    branches: [ "feature/deploy" ]
+    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       environment:
