@@ -75,24 +75,24 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
- deploy:
+  deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event.inputs.environment || 'dev' }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set env from input
+      - name: Set environment variables from input
         id: envpick
         run: |
           ENV="${{ github.event.inputs.environment }}"
           if [ -z "$ENV" ]; then ENV="dev"; fi
           case "$ENV" in
-            dev)  VALUES_FILE="values-dev.yaml"  ; NAMESPACE="${{ env.DEFAULT_NAMESPACE }}";;
+            dev)  VALUES_FILE="values-dev.yaml"; NAMESPACE="${{ env.DEFAULT_NAMESPACE }}";;
             stage) VALUES_FILE="values-stage.yaml"; NAMESPACE="app-stage";;
-            prod) VALUES_FILE="values-prod.yaml" ; NAMESPACE="app-prod";;
+            prod) VALUES_FILE="values-prod.yaml"; NAMESPACE="app-prod";;
             *) echo "Unknown environment: $ENV" && exit 1;;
           esac
           echo "env_name=$ENV" >> $GITHUB_OUTPUT
@@ -105,19 +105,24 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
 
-      - name: Prepare kubeconfig (from secret)
-        # Provide your kubeconfig as a base64 secret named KUBECONFIG_B64
+      - name: Prepare kubeconfig from secret
         run: |
           if [ -z "${{ secrets.KUBECONFIG_B64 }}" ]; then
-            echo "::error::KUBECONFIG_B64 secret is not set"; exit 1;
+            echo "::error::KUBECONFIG_B64 secret is not set"; exit 1
           fi
           echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > $HOME/kubeconfig
           echo "KUBECONFIG=$HOME/kubeconfig" >> $GITHUB_ENV
 
       - name: Create namespace if not exists
         run: |
-          kubectl get ns ${{ steps.envpick.outputs.namespace }} >/dev/null 2>&1 ||           kubectl create ns ${{ steps.envpick.outputs.namespace }}
+          kubectl get ns ${{ steps.envpick.outputs.namespace }} >/dev/null 2>&1 || \
+          kubectl create ns ${{ steps.envpick.outputs.namespace }}
 
       - name: Helm upgrade --install
         run: |
-          helm upgrade --install ${{ env.RELEASE_NAME }} ${{ env.CHART_DIR }}             -n ${{ steps.envpick.outputs.namespace }}             -f ${{ env.CHART_DIR }}/${{ steps.envpick.outputs.values_file }}             --set namespaceOverride=${{ steps.envpick.outputs.namespace }}             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}             --set image.tag=${{ needs.build-and-push.outputs.image_ref##*: }}
+          helm upgrade --install ${{ env.RELEASE_NAME }} ${{ env.CHART_DIR }} \
+            -n ${{ steps.envpick.outputs.namespace }} \
+            -f ${{ env.CHART_DIR }}/${{ steps.envpick.outputs.values_file }} \
+            --set namespaceOverride=${{ steps.envpick.outputs.namespace }} \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ needs.build-and-push.outputs.image_tag }}
