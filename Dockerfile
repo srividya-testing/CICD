@@ -1,19 +1,32 @@
-FROM node:18
+# Stage 1: Build
+FROM node:20-alpine AS builder
 
-# Set the working directory
-WORKDIR /usr/src/app
+# Install dependencies needed for building native modules
+RUN apk add --no-cache python3 make g++
 
-# Copy package.json and package-lock.json
-COPY package*.json ./
+WORKDIR /app
 
-# Install dependencies
-RUN npm install
+# Copy package.json & package-lock.json first to leverage Docker cache
+COPY app/package.json ./package.json
+COPY app/package-lock.json ./package-lock.json
 
-# Copy the application source code
-COPY . .
+# Install production dependencies only
+RUN npm ci --omit=dev
 
-# Expose the application port
+# Copy app source code
+COPY app/ .
+
+# Stage 2: Run
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Copy only production dependencies from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app ./
+
+# Expose app port (adjust if needed)
 EXPOSE 3000
 
-# Command to run the application
+# Start the app
 CMD ["node", "index.js"]
