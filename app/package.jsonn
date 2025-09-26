@@ -1,0 +1,11 @@
+{
+  "name": "nodejs-docker-k8s-starter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
