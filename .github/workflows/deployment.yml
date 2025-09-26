@@ -46,6 +46,7 @@ jobs:
         run: |
           docker buildx create --use --name multiarch || docker buildx use multiarch
 
+      # 🔑 Login to GHCR using PAT
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
@@ -127,8 +128,4 @@ jobs:
       - name: Helm upgrade --install
         run: |
           helm upgrade --install ${{ env.RELEASE_NAME }} ${{ env.CHART_DIR }} \
-            -n ${{ steps.envpick.outputs.namespace }} \
-            -f ${{ env.CHART_DIR }}/${{ steps.envpick.outputs.values_file }} \
-            --set namespaceOverride=${{ steps.envpick.outputs.namespace }} \
-            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
-            --set image.tag=${{ needs.build-and-push.outputs.image_tag }}
+            -n ${{ ste
