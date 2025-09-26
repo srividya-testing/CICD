@@ -18,7 +18,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/nodejs-docker-k8s-starter
+  IMAGE_NAME: ghcr.io/srividya-testing/nodejs-starter
   CHART_DIR: charts/nodeapp
   RELEASE_NAME: nodeapp
   DEFAULT_NAMESPACE: app-demo
