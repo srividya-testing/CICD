@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: app-demo
+
+commonLabels:
+  app.kubernetes.io/part-of: nodeapp
+  app.kubernetes.io/managed-by: kustomize
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - hpa.yaml
+
+images:
+  - name: ghcr.io/ajdevopssolutions/nodejs-docker-k8s-starter
+    newTag: "1.0.0"
+
+configMapGenerator:
+  - name: nodeapp-config
+    literals:
+      - PORT=3000
+      - MESSAGE=Hello from ConfigMap 👋
+generatorOptions:
+  disableNameSuffixHash: false
+  labels:
+    app.kubernetes.io/component: config

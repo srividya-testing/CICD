@@ -1,0 +1,15 @@
+Thank you for installing {{ include "nodeapp.name" . }}!
+
+To access your app:
+
+1. Get the Service URL (port-forward):
+   kubectl -n {{ include "nodeapp.namespace" . }} port-forward svc/{{ include "nodeapp.fullname" . }} 8080:{{ .Values.service.port }}
+   Then open: http://localhost:8080
+
+2. If ingress is enabled and DNS is configured:
+   - Hosts:
+{{- range .Values.ingress.hosts }}
+     • http://{{ .host }}
+{{- end }}
+
+Health endpoint: /healthz

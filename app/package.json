@@ -1,0 +1,14 @@
+{
+  "name": "nodejs-docker-k8s-starter",
+  "version": "1.0.0",
+  "description": "Minimal Express app, Dockerized and ready for Kubernetes",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -1,0 +1,23 @@
+# values-stage.yaml
+replicaCount: 2
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: stage.nodeapp.example.com
+      paths:
+        - path: /?(.*)
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 1
+    memory: 512Mi
+
+env:
+  MESSAGE: "Hello from STAGE 🚀"
