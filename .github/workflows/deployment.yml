@@ -12,13 +12,14 @@ on:
         type: choice
         options: [ "dev", "stage", "prod" ]
       image_tag:
-        description: "Optional custom image tag (defaults to <git-sha>)"
+        description: "Optional custom image tag (defaults to 1.0.0)"
         required: false
         type: string
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: srividya-testing/nodejs-starter
+  IMAGE_NAME: "srividya-testing/nodejs-starter"
+  DEFAULT_TAG: "1.0.0"
   CHART_DIR: charts/nodeapp
   RELEASE_NAME: nodeapp
   DEFAULT_NAMESPACE: app-demo
@@ -31,7 +32,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     outputs:
-      image_ref: ${{ steps.meta.outputs.image_ref }}
+      image_ref: ${{ steps.set_ref.outputs.image_ref }}
+      image_tag: ${{ steps.extract_tag.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -46,13 +48,20 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Compute image tag
-        id: meta
+      - name: Set image reference
+        id: set_ref
         run: |
           TAG="${{ github.event.inputs.image_tag }}"
-          if [ -z "$TAG" ]; then TAG="${GITHUB_SHA}"; fi
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "image_ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG" >> $GITHUB_OUTPUT
+          if [ -z "$TAG" ]; then TAG="${{ env.DEFAULT_TAG }}"; fi
+          IMAGE_REF="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$TAG"
+          echo "image_ref=$IMAGE_REF" >> $GITHUB_OUTPUT
+
+      - name: Extract image tag
+        id: extract_tag
+        run: |
+          IMAGE_REF="${{ steps.set_ref.outputs.image_ref }}"
+          IMAGE_TAG="${IMAGE_REF##*:}"
+          echo "tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
@@ -61,7 +70,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ steps.meta.outputs.image_ref }}
+            ${{ steps.set_ref.outputs.image_ref }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -116,4 +125,4 @@ jobs:
             -f ${{ env.CHART_DIR }}/${{ steps.envpick.outputs.values_file }} \
             --set namespaceOverride=${{ steps.envpick.outputs.namespace }} \
             --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
-            --set image.tag=${{ needs.build-and-push.outputs.image_ref##*: }}
+            --set image.tag=${{ needs.build-and-push.outputs.image_tag }}
