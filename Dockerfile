@@ -6,7 +6,7 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# Copy package.json & package-lock.json first to leverage Docker cache
+# Copy package files first to leverage Docker cache
 COPY app/package.json ./package.json
 COPY app/package-lock.json ./package-lock.json
 
@@ -21,11 +21,11 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Copy only production dependencies from builder
+# Copy only production dependencies and source code
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app ./
 
-# Expose app port (adjust if needed)
+# Expose app port (adjust as needed)
 EXPOSE 3000
 
 # Start the app
