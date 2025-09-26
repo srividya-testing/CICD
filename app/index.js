@@ -1,27 +1,14 @@
-import express from 'express';
-import os from 'os';
-
+const express = require("express");
 const app = express();
+
+const message = process.env.MESSAGE || "Hello from Node.js + Docker + K8s!";
+
+app.get("/", (req, res) => {
+  res.send(message);
+});
+
 const PORT = process.env.PORT || 3000;
-const MESSAGE = process.env.MESSAGE || 'Hello from Node.js on Kubernetes!';
-
-app.get('/healthz', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-app.get('/', (req, res) => {
-  res.status(200).json({
-    message: MESSAGE,
-    hostname: os.hostname(),
-    time: new Date().toISOString(),
-  });
-});
-
-// Basic error route for testing liveness/readiness behavior
-app.get('/error', (req, res) => {
-  res.status(500).json({ error: 'Intentional error for testing' });
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
