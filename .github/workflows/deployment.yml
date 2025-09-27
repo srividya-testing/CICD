@@ -96,7 +96,7 @@ jobs:
       - name: Install Helm
         uses: azure/setup-helm@v4
 
-      - name: Prepare kubeconfig from secret
+      - name: Prepare kubeconfig (from secret)
         run: |
           if [ -z "${{ secrets.KUBECONFIG_B64 }}" ]; then
             echo "::error::KUBECONFIG_B64 secret is not set"; exit 1
